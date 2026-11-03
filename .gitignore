@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Игнорировать все файлы и папки внутри data/, кроме .gitkeep и конфигов
+data/*
+!data/.gitkeep
+!data/data.yaml
+!data/data.yaml.example
+
+# Игнорировать архивы в проекте
+*.zip
+*.tar.gz
+*.rar
+*.7z
