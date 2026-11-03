@@ -3,6 +3,7 @@ from pathlib import Path
 # Пути проекта
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
+FIGURES_DIR = BASE_DIR / "src" / "reports" / "figures"
 
 # Параметры алгоритма CLAHE
 CLAHE_CLIP_LIMIT = 2.0
