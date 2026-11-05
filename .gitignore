@@ -230,3 +230,6 @@ data/*
 *.tar.gz
 *.rar
 *.7z
+
+# Игнор файлов в папке src/reports/figures
+src/reports/figures
