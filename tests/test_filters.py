@@ -15,3 +15,11 @@ def test_preprocessor_shape_and_dtype(dummy_radiograph):
 
     assert enhanced.shape == dummy_radiograph.shape
     assert enhanced.dtype == np.uint8
+
+def test_denoise_median_filter(dummy_radiograph):
+    """Проверка подавления шума медианным фильтром."""
+    preprocessor = ImagePreprocessor()
+    denoised = preprocessor.denoise(dummy_radiograph)
+
+    assert denoised.shape == dummy_radiograph.shape
+    assert isinstance(denoised, np.ndarray)
