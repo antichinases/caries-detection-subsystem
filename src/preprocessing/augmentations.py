@@ -1,5 +1,6 @@
 import albumentations as A
 import cv2
+import numpy as np
 
 class DentalAugmentor:
     """Пайплайн аугментации дентальных рентгенограмм с корректным пересчетом рамок YOLO."""
@@ -27,3 +28,16 @@ class DentalAugmentor:
                 min_visibility=0.25
             )
         )
+
+    def transform(self, image: np.ndarray, bboxes: list, class_labels: list) -> dict:
+        """Применяет аугментации к снимку и пересчитывает координаты меток."""
+        augmented = self.pipeline(
+            image=image,
+            bboxes=bboxes,
+            class_labels=class_labels
+        )
+        return {
+            "image": augmented["image"],
+            "bboxes": augmented["bboxes"],
+            "class_labels": augmented["class_labels"]
+        }
