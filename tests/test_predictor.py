@@ -18,3 +18,9 @@ def test_detector_output_format(detector):
     for item in results:
         assert set(item.keys()) == {"box", "confidence", "class_id", "label"}
         assert len(item["box"]) == 4
+
+def test_high_confidence_filters_noise(detector):
+    """Проверка отсечения шума при высоком пороге уверенности."""
+    dummy_img = np.random.randint(0, 256, (640, 640), dtype=np.uint8)
+    results = detector.predict(dummy_img, conf_thresh=0.999)
+    assert results == []
