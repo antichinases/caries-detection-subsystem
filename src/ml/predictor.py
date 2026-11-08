@@ -43,3 +43,57 @@ class CariesDetector:
         left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
         img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(114, 114, 114))
         return img, r, (dw, dh)
+
+    def predict(self, image: np.ndarray, conf_thresh: float = DEFAULT_CONF_THRESHOLD) -> list[dict]:
+        """Поиск очагов кариеса на снимке."""
+        orig_h, orig_w = image.shape[:2]
+
+        if len(image.shape) == 2:
+            image_rgb = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+        else:
+            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        input_img, ratio, (pad_w, pad_h) = self._letterbox(image_rgb, (IMAGE_SIZE, IMAGE_SIZE))
+        blob = input_img.astype(np.float32) / 255.0
+        blob = np.transpose(blob, (2, 0, 1))[np.newaxis, ...]
+
+        outputs = self.session.run(self.output_names, {self.input_name: blob})
+        predictions = np.squeeze(outputs[0]).T
+
+        boxes, scores, class_ids = [], [], []
+
+        for pred in predictions:
+            cls_scores = pred[4:]
+            max_score = float(np.max(cls_scores))
+            if max_score >= conf_thresh:
+                class_id = int(np.argmax(cls_scores))
+                cx, cy, w, h = pred[0], pred[1], pred[2], pred[3]
+
+                x1 = cx - w / 2
+                y1 = cy - h / 2
+                boxes.append([x1, y1, w, h])
+                scores.append(max_score)
+                class_ids.append(class_id)
+
+        if not boxes:
+            return []
+
+        indices = cv2.dnn.NMSBoxes(boxes, scores, conf_thresh, NMS_IOU_THRESHOLD)
+        detections = []
+
+        if len(indices) > 0:
+            for i in indices.flatten():
+                bx, by, bw, bh = boxes[i]
+                x1 = int(np.clip((bx - pad_w) / ratio, 0, orig_w))
+                y1 = int(np.clip((by - pad_h) / ratio, 0, orig_h))
+                x2 = int(np.clip((bx + bw - pad_w) / ratio, 0, orig_w))
+                y2 = int(np.clip((by + bh - pad_h) / ratio, 0, orig_h))
+
+                detections.append({
+                    "box": [x1, y1, x2, y2],
+                    "confidence": round(scores[i], 3),
+                    "class_id": class_ids[i],
+                    "label": CLASS_NAMES.get(class_ids[i], "Unknown")
+                })
+
+        return detections
