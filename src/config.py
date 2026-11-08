@@ -14,11 +14,15 @@ CLAHE_TILE_GRID_SIZE = (8, 8)
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 WEIGHTS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Параметры нейросети YOLO11
+# Параметры нейросети YOLO11 и инференса
 DATA_YAML_PATH = DATA_DIR / "data.yaml"
 BASE_MODEL_NAME = "yolo11s.pt"
 BEST_PT_PATH = WEIGHTS_DIR / "best.pt"
 ONNX_MODEL_PATH = WEIGHTS_DIR / "best.onnx"
+
+IMAGE_SIZE = 640
+DEFAULT_CONF_THRESHOLD = 0.50
+NMS_IOU_THRESHOLD = 0.45
 
 # Соответствие классов кариеса
 CLASS_NAMES = {
